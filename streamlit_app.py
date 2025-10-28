@@ -1,4 +1,4 @@
-%%writefile streamlit_app.py
+
 import streamlit as st
 import numpy as np
 import librosa
@@ -100,3 +100,4 @@ if uploaded_file:
 
     st.subheader("Denoised Audio")
     st.audio(audio_bytes(y_denoised), format='audio/wav')
+

@@ -13,7 +13,7 @@ st.set_page_config(page_title="Audio Denoiser", layout="wide")
 # Build DeepFilterNet model
 # ===========================
 def build_deepfilternet(freq_bins=257):
-    input_layer = layers.Input(shape=(None, freq_bins, 1))
+    input_layer = layers.Input(shape=(256, freq_bins, 1))
     x = layers.Conv2D(64, (3,3), activation='relu', padding='same')(input_layer)
     x = layers.BatchNormalization()(x)
     x = layers.Conv2D(64, (3,3), activation='relu', padding='same')(x)
@@ -100,4 +100,5 @@ if uploaded_file:
 
     st.subheader("Denoised Audio")
     st.audio(audio_bytes(y_denoised), format='audio/wav')
+
 

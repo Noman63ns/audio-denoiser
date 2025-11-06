@@ -1,7 +1,8 @@
-streamlit==1.39.0
-tensorflow-cpu==2.16.1
-librosa==0.10.1
+streamlit==1.25.0
+torch==2.3.1
+torchaudio==2.3.1
+librosa==0.10.3
 soundfile==0.12.1
-matplotlib==3.9.0
-numpy==1.26.4
-pyngrok==7.1.6
+matplotlib==3.8.1
+numpy==1.26.5
+pyngrok==5.2.1

@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # ✅ Force TensorFlow to use CPU only
+
 import streamlit as st
 import numpy as np
 import librosa
@@ -9,7 +12,7 @@ import io
 st.set_page_config(page_title="Audio Denoiser", layout="wide")
 
 # ===========================
-# Build DeepFilterNet model
+# ✅ Build DeepFilterNet-like Model
 # ===========================
 def build_deepfilternet(freq_bins=257):
     input_layer = layers.Input(shape=(None, freq_bins, 1))
@@ -25,15 +28,19 @@ def build_deepfilternet(freq_bins=257):
     model = models.Model(inputs=input_layer, outputs=output)
     return model
 
-# Create and store model in session state
-if "model" not in st.session_state:
-    st.session_state.model = build_deepfilternet()
-    st.session_state.model.compile(optimizer='adam', loss='mse')
+# ===========================
+# ✅ Cache the model for faster reloads
+# ===========================
+@st.cache_resource
+def load_model():
+    model = build_deepfilternet()
+    model.compile(optimizer='adam', loss='mse')
+    return model
 
-model = st.session_state.model
+model = load_model()
 
 # ===========================
-# Audio processing functions
+# ✅ Audio Processing
 # ===========================
 def load_audio_file(uploaded_file, sr=16000, n_fft=512, hop_length=128):
     y, _ = librosa.load(uploaded_file, sr=sr)
@@ -43,7 +50,7 @@ def load_audio_file(uploaded_file, sr=16000, n_fft=512, hop_length=128):
     return y, mag, phase
 
 def denoise_audio(y, mag, phase, strength='normal'):
-    enhanced_mag = model.predict(mag)[0, ..., 0].T
+    enhanced_mag = model.predict(mag, verbose=0)[0, ..., 0].T
     if strength == 'normal':
         freq_mask = np.linspace(1, 0.5, enhanced_mag.shape[0])[:, np.newaxis]
     else:
@@ -55,7 +62,6 @@ def denoise_audio(y, mag, phase, strength='normal'):
     y_denoised = librosa.istft(enhanced_stft, hop_length=128)
     return y_denoised
 
-# Helper to convert audio to BytesIO for Streamlit
 def audio_bytes(y, sr=16000):
     buffer = io.BytesIO()
     sf.write(buffer, y, sr, format='WAV')
@@ -63,9 +69,10 @@ def audio_bytes(y, sr=16000):
     return buffer
 
 # ===========================
-# Streamlit UI
+# ✅ Streamlit App UI
 # ===========================
-st.title("🎧 Audio Denoiser with DeepFilterNet")
+st.title("🎧 Audio Denoiser with DeepFilterNet (CPU Optimized)")
+st.markdown("Upload `.wav` or `.mp3`, optionally add Gaussian noise, and denoise it using a DeepFilterNet-like model (runs entirely on CPU).")
 
 uploaded_file = st.file_uploader("Upload an audio file (WAV/MP3)", type=["wav","mp3"])
 strength = st.selectbox("Select denoising strength", options=["normal","harsh"])
@@ -82,20 +89,20 @@ if uploaded_file:
 
     y_denoised = denoise_audio(y_noisy, mag, phase, strength=strength)
 
-    # Plot waveforms
-    fig, ax = plt.subplots(3,1, figsize=(12,6))
+    # ✅ Waveform visualization
+    fig, ax = plt.subplots(3, 1, figsize=(12, 6))
     ax[0].plot(y); ax[0].set_title("Original Audio")
     ax[1].plot(y_noisy); ax[1].set_title("Noisy Audio")
     ax[2].plot(y_denoised); ax[2].set_title(f"Denoised Audio ({strength})")
     plt.tight_layout()
     st.pyplot(fig)
 
-    # Play audio
-    st.subheader("Original Audio")
+    # ✅ Audio playback
+    st.subheader("🔹 Original Audio")
     st.audio(audio_bytes(y), format='audio/wav')
 
-    st.subheader("Noisy Audio")
+    st.subheader("🔹 Noisy Audio")
     st.audio(audio_bytes(y_noisy), format='audio/wav')
 
-    st.subheader("Denoised Audio")
+    st.subheader("🔹 Denoised Audio")
     st.audio(audio_bytes(y_denoised), format='audio/wav')

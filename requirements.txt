@@ -1,7 +1,7 @@
-streamlit
-tensorflow
-librosa
-soundfile
-matplotlib
-numpy
-pyngrok
+streamlit==1.39.0
+tensorflow-cpu==2.16.1
+librosa==0.10.1
+soundfile==0.12.1
+matplotlib==3.9.0
+numpy==1.26.4
+pyngrok==7.1.6

@@ -4,6 +4,7 @@ torchaudio==2.9.0
 librosa==0.10.0.post2
 soundfile==0.12.1
 matplotlib==3.8.1
-numpy==1.26.5
-pyngrok==5.2.1
+numpy
+pyngrok
+
 
